@@ -4,8 +4,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.model.Student;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FacultyServiceTest {
@@ -53,6 +56,13 @@ public class FacultyServiceTest {
         facultyService.deleteFaculty(2);
         expectedFacultyMap.remove((long) 2);
         Assertions.assertEquals(expectedFacultyMap, facultyService.readAllFaculties());
+    }
+
+    @Test
+    public void filterByAgeTest(){
+        List<Faculty> expectedList = new ArrayList<>();
+        expectedList.add(faculty1);
+        Assertions.assertEquals(expectedList, facultyService.filterByColor("Red"));
     }
 
 }

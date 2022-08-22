@@ -5,7 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.hogwarts.school.model.Student;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class StudentServiceTest {
@@ -54,6 +56,14 @@ public class StudentServiceTest {
         studentService.deleteStudent(2);
         expectedStudentMap.remove((long) 2);
         Assertions.assertEquals(expectedStudentMap, studentService.readAllStudents());
+    }
+
+    @Test
+    public void filterByAgeTest(){
+        List<Student> expectedList = new ArrayList<>();
+        expectedList.add(student1);
+        expectedList.add(student2);
+        Assertions.assertEquals(expectedList, studentService.filterByAge(11));
     }
 
 }

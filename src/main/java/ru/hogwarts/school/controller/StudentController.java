@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -35,6 +36,15 @@ public class StudentController {
     @GetMapping
     public ResponseEntity<Map<Long, Student>> getAllStudents(){
         return ResponseEntity.ok(studentService.readAllStudents());
+    }
+
+    @GetMapping("/age")
+    public ResponseEntity<List<Student>> filterByAge(@RequestParam("age") int age){
+        List<Student> studentsFilteredByAge = studentService.filterByAge(age);
+        if(studentsFilteredByAge.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(studentsFilteredByAge);
     }
 
     @PutMapping

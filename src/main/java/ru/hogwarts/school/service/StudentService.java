@@ -5,7 +5,9 @@ import ru.hogwarts.school.exceptions.StudentNotFoundException;
 import ru.hogwarts.school.model.Student;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
@@ -42,4 +44,9 @@ public class StudentService {
         return studentMap.remove(id);
     }
 
+    public List<Student> filterByAge(int age) {
+        return studentMap.values().stream()
+                .filter(s -> s.getAge() == age)
+                .collect(Collectors.toList());
+    }
 }

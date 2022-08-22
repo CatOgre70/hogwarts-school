@@ -5,7 +5,9 @@ import ru.hogwarts.school.exceptions.FacultyNotFoundException;
 import ru.hogwarts.school.model.Faculty;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class FacultyService {
@@ -40,4 +42,9 @@ public class FacultyService {
         return facultyMap.remove(id);
     }
 
+    public List<Faculty> filterByColor(String color) {
+        return facultyMap.values().stream()
+                .filter(f -> f.getColor().equals(color))
+                .collect(Collectors.toList());
+    }
 }

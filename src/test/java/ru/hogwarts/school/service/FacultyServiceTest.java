@@ -3,42 +3,58 @@ package ru.hogwarts.school.service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.hogwarts.school.model.Faculty;
-import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.repository.FacultyRepository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 public class FacultyServiceTest {
 
-    FacultyService facultyService = new FacultyService();
-    Map<Long, Faculty> expectedFacultyMap;
-    Faculty faculty1, faculty2;
+    @Mock
+    private FacultyRepository facultyRepository;
+
+    @InjectMocks
+    private FacultyService facultyService;
+
+    private List<Faculty> expectedFacultyMap;
+    private Faculty faculty1, faculty2;
+    private List<Faculty> dataBaseMock;
 
     @BeforeEach
     public void variablesInit(){
-        expectedFacultyMap = new HashMap<>();
         faculty1 = new Faculty("Gryffindor", "Red");
-        faculty1.setId(1);
-        expectedFacultyMap.put((long) 1, faculty1);
+        faculty1.setId(1L);
         faculty2 = new Faculty("Slytherin", "Green");
-        faculty2.setId(2);
-        expectedFacultyMap.put((long) 2, faculty2);
-        facultyService.createFaculty(faculty1);
-        facultyService.createFaculty(faculty2);
+        faculty2.setId(2L);
+        expectedFacultyMap = new ArrayList<>(List.of(faculty1, faculty2));
+        dataBaseMock = new ArrayList<>(List.of(faculty1, faculty2));
     }
 
     @Test
     public void createFacultyTest(){
+        when(facultyRepository.findAll()).thenReturn(dataBaseMock);
+        when(facultyRepository.save(faculty1)).thenReturn(dataBaseMock.get(0));
+        when(facultyRepository.save(faculty2)).thenReturn(dataBaseMock.get(1));
+        Assertions.assertEquals(expectedFacultyMap.get(0), facultyService.createFaculty(faculty1));
+        Assertions.assertEquals(expectedFacultyMap.get(1), facultyService.createFaculty(faculty2));
         Assertions.assertEquals(expectedFacultyMap, facultyService.readAllFaculties());
     }
 
     @Test
     public void readFacultyTest(){
-        Faculty result1 = facultyService.readFaculty(1);
-        Faculty result2 = facultyService.readFaculty(2);
+        when(facultyRepository.findById(1L)).thenReturn(Optional.ofNullable(dataBaseMock.get(0)));
+        when(facultyRepository.findById(2L)).thenReturn(Optional.ofNullable(dataBaseMock.get(1)));
+        Faculty result1 = facultyService.readFaculty(1L).getBody();
+        Faculty result2 = facultyService.readFaculty(2L).getBody();
         Assertions.assertEquals(faculty1, result1);
         Assertions.assertEquals(faculty2, result2);
     }
@@ -46,22 +62,30 @@ public class FacultyServiceTest {
     @Test
     public void updateFacultyTest(){
         Faculty updatedFaculty = new Faculty("Gryffindor", "Scarlet");
-        updatedFaculty.setId(1);
+        updatedFaculty.setId(1L);
+        dataBaseMock.get(0).setColor("Scarlet");
+        when(facultyRepository.save(updatedFaculty)).thenReturn(dataBaseMock.get(0));
+        when(facultyRepository.findById(1L)).thenReturn(Optional.ofNullable(dataBaseMock.get(0)));
         facultyService.updateFaculty(updatedFaculty);
-        Assertions.assertEquals(updatedFaculty, facultyService.readFaculty(1));
+        Assertions.assertEquals(updatedFaculty, facultyService.readFaculty(1).getBody());
+        dataBaseMock.get(0).setColor("Red");
     }
 
     @Test
     public void deleteFacultyTest(){
+        expectedFacultyMap.remove(1);
+        dataBaseMock.remove(1);
+        when(facultyRepository.findAll()).thenReturn(dataBaseMock);
         facultyService.deleteFaculty(2);
-        expectedFacultyMap.remove((long) 2);
         Assertions.assertEquals(expectedFacultyMap, facultyService.readAllFaculties());
+        expectedFacultyMap.add(faculty2);
+        dataBaseMock.add(faculty2);
     }
 
     @Test
-    public void filterByAgeTest(){
-        List<Faculty> expectedList = new ArrayList<>();
-        expectedList.add(faculty1);
+    public void filterByColorTest(){
+        when(facultyRepository.findByColor("Red")).thenReturn(List.of(faculty1));
+        List<Faculty> expectedList = new ArrayList<>(List.of(faculty1));
         Assertions.assertEquals(expectedList, facultyService.filterByColor("Red"));
     }
 

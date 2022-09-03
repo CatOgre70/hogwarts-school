@@ -3,9 +3,12 @@ package ru.hogwarts.school.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/faculty")
@@ -24,34 +27,44 @@ public class FacultyController {
         return ResponseEntity.ok(createdFaculty);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Faculty> getFaculty(@PathVariable Long id){
-        return facultyService.readFaculty(id);
+        Optional<Faculty> faculty = facultyService.readFaculty(id);
+        if(faculty.isEmpty()){
+            return ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.ok(faculty.get());
+        }
     }
 
     @GetMapping
-    public ResponseEntity<List<Faculty>> getAllFaculties(){
-        return ResponseEntity.ok(facultyService.readAllFaculties());
+    public List<Faculty> getAllFaculties(){
+        return facultyService.readAllFaculties();
     }
 
     @GetMapping("/color")
-    public ResponseEntity<List<Faculty>> filterByColor(@RequestParam("color") String color){
-        List<Faculty> facultyFilteredByColor = facultyService.filterByColor(color);
-        if(facultyFilteredByColor.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(facultyFilteredByColor);
+    public List<Faculty> filterByColor(@RequestParam("color") String color){
+        return facultyService.filterByColor(color);
+    }
+
+    @GetMapping("/getfacultyallstudents")
+    public Set<Student> getFacultyAllStudents(@RequestParam("id") int id){
+        return facultyService.getFacultyAllStudents(id);
     }
 
     @PutMapping
-    public ResponseEntity<Faculty> updateFaculty(@RequestBody Faculty faculty){
-        Faculty faculty1 = facultyService.updateFaculty(faculty);
-        return ResponseEntity.ok(faculty1);
+    public Faculty updateFaculty(@RequestBody Faculty faculty){
+        return facultyService.updateFaculty(faculty);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public void deleteFaculty(@PathVariable Long id){
         facultyService.deleteFaculty(id);
+    }
+
+    @GetMapping("/findbystring")
+    public List<Faculty> findByColorOrName(@RequestParam("string") String str){
+        return facultyService.findByColorOrName(str, str);
     }
 
 }

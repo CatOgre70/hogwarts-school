@@ -53,10 +53,10 @@ public class FacultyServiceTest {
     public void readFacultyTest(){
         when(facultyRepository.findById(1L)).thenReturn(Optional.ofNullable(dataBaseMock.get(0)));
         when(facultyRepository.findById(2L)).thenReturn(Optional.ofNullable(dataBaseMock.get(1)));
-        Faculty result1 = facultyService.readFaculty(1L).getBody();
-        Faculty result2 = facultyService.readFaculty(2L).getBody();
-        Assertions.assertEquals(faculty1, result1);
-        Assertions.assertEquals(faculty2, result2);
+        Optional<Faculty> result1 = facultyService.readFaculty(1L);
+        Optional<Faculty> result2 = facultyService.readFaculty(2L);
+        Assertions.assertEquals(faculty1, result1.get());
+        Assertions.assertEquals(faculty2, result2.get());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class FacultyServiceTest {
         when(facultyRepository.save(updatedFaculty)).thenReturn(dataBaseMock.get(0));
         when(facultyRepository.findById(1L)).thenReturn(Optional.ofNullable(dataBaseMock.get(0)));
         facultyService.updateFaculty(updatedFaculty);
-        Assertions.assertEquals(updatedFaculty, facultyService.readFaculty(1).getBody());
+        Assertions.assertEquals(updatedFaculty, facultyService.readFaculty(1).get());
         dataBaseMock.get(0).setColor("Red");
     }
 

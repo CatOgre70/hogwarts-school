@@ -69,11 +69,7 @@ public class StudentServiceTest {
         when(studentRepository.save(updatedStudent1)).thenReturn(dataBaseMock.get(0));
         studentService.updateStudent(updatedStudent1);
         when(studentRepository.findById(1L)).thenReturn(Optional.ofNullable(dataBaseMock.get(0)));
-        if(studentService.readStudent(1).isEmpty()){
-            return;
-        } else {
-            result = studentService.readStudent(1).get();
-        }
+        result = studentService.readStudent(1).get();
         Assertions.assertEquals(updatedStudent1, result);
         dataBaseMock.get(0).setAge(11);
     }

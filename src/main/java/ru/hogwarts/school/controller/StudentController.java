@@ -2,6 +2,7 @@ package ru.hogwarts.school.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
@@ -12,7 +13,7 @@ import java.util.Optional;
 @RequestMapping("/student")
 public class StudentController {
 
-    final StudentService studentService;
+    private final StudentService studentService;
 
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
@@ -24,7 +25,7 @@ public class StudentController {
         return ResponseEntity.ok(createdStudent);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Student> getStudent(@PathVariable Long id){
         Optional<Student> student = studentService.readStudent(id);
         if(student.isEmpty()){
@@ -34,17 +35,23 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Student>> getAllStudents(){
-        return ResponseEntity.ok(studentService.readAllStudents());
+    public List<Student> getAllStudents(){
+        return studentService.readAllStudents();
     }
 
     @GetMapping("/age")
-    public ResponseEntity<List<Student>> filterByAge(@RequestParam("age") int age){
-        List<Student> studentsFilteredByAge = studentService.filterByAge(age);
-        if(studentsFilteredByAge.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(studentsFilteredByAge);
+    public List<Student> filterByAge(@RequestParam("age") int age){
+        return studentService.filterByAge(age);
+    }
+
+    @GetMapping("/findbyagebetween")
+    public List<Student> findByAgeBetween(@RequestParam("min") int min, @RequestParam("max") int max){
+        return studentService.findByAgeBetween(min, max);
+    }
+
+    @GetMapping("/getstudentfacultybyid")
+    public Faculty getStudentFaculty(@RequestParam("id") int id){
+        return studentService.getFaculty(id);
     }
 
     @PutMapping
@@ -53,7 +60,7 @@ public class StudentController {
         return ResponseEntity.ok(student1);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public void deleteStudent(@PathVariable Long id){
         studentService.deleteStudent(id);
     }

@@ -40,14 +40,14 @@ public class FacultyService {
     }
 
     public List<Faculty> filterByColor(String color) {
-        return facultyRepository.findByColor(color);
+        return facultyRepository.findByColorIgnoreCase(color);
     }
 
     public List<Faculty> findByColorOrName(String color, String name) {
         return facultyRepository.findByColorContainingIgnoreCaseOrNameContainingIgnoreCase(color, name);
     }
 
-    public Set<Student> getFacultyAllStudents(int id) {
+    public Set<Student> getFacultyAllStudents(Long id) {
         Optional<Faculty> faculty = readFaculty(id);
         if(faculty.isPresent()){
             return faculty.get().getStudents();

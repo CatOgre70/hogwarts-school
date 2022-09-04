@@ -2,6 +2,7 @@ package ru.hogwarts.school.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.exceptions.IllegalArgumentExceptionInGetAllStudents;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
@@ -35,22 +36,22 @@ public class StudentController {
     }
 
     @GetMapping
-    public List<Student> getAllStudents(){
-        return studentService.readAllStudents();
+    public List<Student> getAllStudents(@RequestParam(value = "age", required = false) Integer age,
+                                        @RequestParam(value = "min", required = false) Integer min,
+                                        @RequestParam(value = "max", required = false) Integer max){
+        if(age == null && min == null && max == null){
+            return studentService.readAllStudents();
+        } else if(age != null && min == null && max == null){
+            return studentService.filterByAge(age);
+        } else if(age == null && min != null && max != null){
+            return studentService.findByAgeBetween(min, max);
+        } else {
+            throw new IllegalArgumentExceptionInGetAllStudents("Wrong parameters in the REST request");
+        }
     }
 
-    @GetMapping("/age")
-    public List<Student> filterByAge(@RequestParam("age") int age){
-        return studentService.filterByAge(age);
-    }
-
-    @GetMapping("/findbyagebetween")
-    public List<Student> findByAgeBetween(@RequestParam("min") int min, @RequestParam("max") int max){
-        return studentService.findByAgeBetween(min, max);
-    }
-
-    @GetMapping("/getstudentfacultybyid")
-    public Faculty getStudentFaculty(@RequestParam("id") int id){
+    @GetMapping("/{id}/faculty")
+    public Faculty getStudentFaculty(@PathVariable int id){
         return studentService.getFaculty(id);
     }
 

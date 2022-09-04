@@ -38,17 +38,21 @@ public class FacultyController {
     }
 
     @GetMapping
-    public List<Faculty> getAllFaculties(){
-        return facultyService.readAllFaculties();
+    public List<Faculty> getAllFaculties(@RequestParam(value = "color", required = false) String color,
+                                         @RequestParam(value = "findbystring", required = false) String str){
+        if(color == null && str == null){
+            return facultyService.readAllFaculties();
+        } else if(color != null && str == null){
+            return facultyService.filterByColor(color);
+        } else if(color == null && str != null){
+            return facultyService.findByColorOrName(str, str);
+        } else {
+            return facultyService.findByColorOrName(color, str);
+        }
     }
 
-    @GetMapping("/color")
-    public List<Faculty> filterByColor(@RequestParam("color") String color){
-        return facultyService.filterByColor(color);
-    }
-
-    @GetMapping("/getfacultyallstudents")
-    public Set<Student> getFacultyAllStudents(@RequestParam("id") int id){
+    @GetMapping("/{id}/students")
+    public Set<Student> getFacultyAllStudents(@PathVariable Long id){
         return facultyService.getFacultyAllStudents(id);
     }
 
@@ -60,11 +64,6 @@ public class FacultyController {
     @DeleteMapping("/{id}")
     public void deleteFaculty(@PathVariable Long id){
         facultyService.deleteFaculty(id);
-    }
-
-    @GetMapping("/findbystring")
-    public List<Faculty> findByColorOrName(@RequestParam("string") String str){
-        return facultyService.findByColorOrName(str, str);
     }
 
 }

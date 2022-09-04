@@ -84,7 +84,7 @@ public class FacultyServiceTest {
 
     @Test
     public void filterByColorTest(){
-        when(facultyRepository.findByColor("Red")).thenReturn(List.of(faculty1));
+        when(facultyRepository.findByColorIgnoreCase("Red")).thenReturn(List.of(faculty1));
         List<Faculty> expectedList = new ArrayList<>(List.of(faculty1));
         Assertions.assertEquals(expectedList, facultyService.filterByColor("Red"));
     }

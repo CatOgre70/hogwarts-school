@@ -82,7 +82,6 @@ public class FacultyControllerTest {
 
     @Test
     public void getAllFacultiesTest() throws Exception {
-
         Faculty faculty1 = new Faculty("Gryffindor", "Scarlet");
         faculty1.setId(1L);
         Faculty faculty2 = new Faculty("Slytherin", "Green");
@@ -100,7 +99,6 @@ public class FacultyControllerTest {
 
     @Test
     public void getAllFacultiesByColorTest() throws Exception {
-
         Faculty faculty1 = new Faculty("Gryffindor", "Green");
         faculty1.setId(1L);
         Faculty faculty2 = new Faculty("Slytherin", "Green");
@@ -119,7 +117,6 @@ public class FacultyControllerTest {
 
     @Test
     public void getAllFacultiesByNameTest() throws Exception {
-
         Faculty faculty1 = new Faculty("Gryffindor", "Green");
         faculty1.setId(1L);
         Faculty faculty2 = new Faculty("Slytherin", "Green");
@@ -180,7 +177,5 @@ public class FacultyControllerTest {
 
         verify(facultyRepository, atLeastOnce()).deleteById(1L);
     }
-
-
 
 }

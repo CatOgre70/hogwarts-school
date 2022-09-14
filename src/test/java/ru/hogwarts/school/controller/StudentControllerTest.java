@@ -6,16 +6,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Set;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class StudentControllerTest {
 
@@ -30,53 +35,189 @@ public class StudentControllerTest {
 
     @Test
     public void createStudentTest() {
-        Student student = new Student("Miles Bletchley", 11);
-        Assertions
-                .assertThat(this.restTemplate.postForObject("http://localhost:" + port + "/student",
-                        student, String.class)).isNotNull();
+        Student student = givenStudentWith("Miles Bletchley", 11, "Slytherin", "Green");
+        ResponseEntity<Student> response = saveStudentInDatabase(getURIBuilder().build().toUri(), student);
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertThat(response.getBody()).isNotNull();
+        Assertions.assertThat(response.getBody().getId()).isNotNull();
     }
 
     @Test
     public void getStudentTest() {
-        Assertions
-                .assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/student/9",
-                        String.class)).isNotNull();
+        Student student = givenStudentWith("Miles Bletchley", 11, "Slytherin", "Green");
+        ResponseEntity<Student> response = saveStudentInDatabase(getURIBuilder().build().toUri(), student);
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertThat(response.getBody()).isNotNull();
+        Assertions.assertThat(response.getBody().getId()).isNotNull();
+
+        Student createdStudent = response.getBody();
+
+        URI uri = getURIBuilder().path("/{id}").buildAndExpand(createdStudent.getId()).toUri();
+        response = restTemplate.getForEntity(uri, Student.class);
+        Assertions.assertThat(response.getBody()).isEqualTo(createdStudent);
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     public void getAllStudentsTest() {
-        Assertions
-                .assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/student",
-                        String.class)).isNotNull();
+        Student student18 = givenStudentWith("studentName1", 18, "Slytherin", "Green");
+        Student student25 = givenStudentWith("studentName2", 25, "Slytherin", "Green");
+        Student student28 = givenStudentWith("studentName3", 28, "Slytherin", "Green");
+        Student student32 = givenStudentWith("studentName3", 32, "Slytherin", "Green");
+        URI uri = getURIBuilder().build().toUri();
+        saveStudentInDatabase(uri, student18);
+        saveStudentInDatabase(uri, student25);
+        saveStudentInDatabase(uri, student28);
+        saveStudentInDatabase(uri, student32);
+
+        ResponseEntity<Set<Student>> response = restTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Set<Student>>() {
+                });
+        Assertions.assertThat(response.getBody()).isNotNull();
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        Set<Student> actualResult = response.getBody();
+        resetIds(actualResult);
+        Assertions.assertThat(actualResult).containsExactlyInAnyOrder(student18, student25, student28, student32);
+    }
+
+    @Test
+    public void getAllStudentsByAgeTest() {
+        Student student18 = givenStudentWith("studentName1", 18, "Slytherin", "Green");
+        Student student25 = givenStudentWith("studentName2", 25, "Slytherin", "Green");
+        Student student28 = givenStudentWith("studentName3", 28, "Slytherin", "Green");
+        Student student32 = givenStudentWith("studentName3", 32, "Slytherin", "Green");
+        URI uri = getURIBuilder().build().toUri();
+        saveStudentInDatabase(uri, student18);
+        saveStudentInDatabase(uri, student25);
+        saveStudentInDatabase(uri, student28);
+        saveStudentInDatabase(uri, student32);
+
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.add("age", "25");
+        studentsAreFoundByCriteria(queryParams, student25);
+    }
+
+    @Test
+    public void getAllStudentsByAgeBetweenTest() {
+        Student student18 = givenStudentWith("studentName1", 18, "Slytherin", "Green");
+        Student student25 = givenStudentWith("studentName2", 25, "Slytherin", "Green");
+        Student student28 = givenStudentWith("studentName3", 28, "Slytherin", "Green");
+        Student student32 = givenStudentWith("studentName3", 32, "Slytherin", "Green");
+        URI uri = getURIBuilder().build().toUri();
+        saveStudentInDatabase(uri, student18);
+        saveStudentInDatabase(uri, student25);
+        saveStudentInDatabase(uri, student28);
+        saveStudentInDatabase(uri, student32);
+
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.add("min", "20");
+        queryParams.add("max", "30");
+        studentsAreFoundByCriteria(queryParams, student25, student28);
     }
 
     @Test
     public void getStudentFacultyTest() {
-        Faculty faculty = facultyService.readFaculty(2).orElse(null);
+        Student student = givenStudentWith("studentName1", 18, "Slytherin", "Green");
+        student = saveStudentInDatabase(getURIBuilder().build().toUri(), student).getBody();
+        Faculty faculty = student.getFaculty();
+        URI uri = getURIBuilder().path("/{id}/faculty").buildAndExpand(student.getId()).toUri();
         Assertions
-                .assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/student/9/faculty",
-                        Faculty.class)).isEqualTo(faculty);
+                .assertThat(this.restTemplate.getForObject(uri, Faculty.class)).isEqualTo(faculty);
     }
 
     @Test
-    public void updateStudentTest() throws URISyntaxException {
-        Student student = new Student("Miles Bletchley", 11);
-        student.setId(9L);
-        Faculty faculty = new Faculty("Slytherin", "Green");
-        faculty.setId(2L);
-        student.setFaculty(faculty);
+    public void updateStudentTest() {
+        Student student = givenStudentWith("Miles Bletchley", 11, "Slytherin", "Green");
+        ResponseEntity<Student> response = saveStudentInDatabase(getURIBuilder().build().toUri(), student);
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertThat(response.getBody()).isNotNull();
+        Assertions.assertThat(response.getBody().getId()).isNotNull();
+        student = response.getBody();
+        updatingStudent(student, "Miles Bletchley", 12);
+        studentHasBeenUpdated(student, "Miles Bletchley", 12);
+    }
 
-        String baseUrl = "http://localhost:" + port + "/student";
-        URI uri = new URI(baseUrl);
+    @Test
+    public void deleteStudentTest() {
+        Student student = givenStudentWith("Miles Bletchley", 11, "Slytherin", "Green");
+        ResponseEntity<Student> response = saveStudentInDatabase(getURIBuilder().build().toUri(), student);
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertThat(response.getBody()).isNotNull();
+        Assertions.assertThat(response.getBody().getId()).isNotNull();
+        student = response.getBody();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-COM-PERSIST", "true"); // What does it mean, "X-COM-PERSIST"?
+        URI uri = getURIBuilder().cloneBuilder().path("/{id}").buildAndExpand(student.getId()).toUri();
+        restTemplate.delete(uri);
+        response = restTemplate.getForEntity(uri, Student.class);
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
 
-        HttpEntity<Student> request = new HttpEntity<>(student, headers);
+    private void studentHasBeenUpdated(Student student, String newName, int newAge) {
+        URI uri = getURIBuilder().path("/{id}").buildAndExpand(student.getId()).toUri();
+        ResponseEntity<Student> response = restTemplate.getForEntity(uri, Student.class);
 
-        ResponseEntity<Student> result = this.restTemplate.postForEntity(uri, request, Student.class);
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Assertions.assertThat(response.getBody()).isNotNull();
+        Assertions.assertThat(response.getBody().getAge()).isEqualTo(newAge);
+        Assertions.assertThat(response.getBody().getName()).isEqualTo(newName);
+    }
 
-        org.junit.jupiter.api.Assertions.assertEquals(200, result.getStatusCodeValue());
+    private void updatingStudent(Student student, String newName, int newAge) {
+        student.setName(newName);
+        student.setAge(newAge);
+
+        restTemplate.put(getURIBuilder().build().toUri(), student);
+    }
+
+    private Student givenStudentWith(String name, Integer age, String facultyName, String facultyColor) {
+        Student student = new Student(name, age);
+        Faculty faculty = new Faculty(facultyName, facultyColor);
+        Faculty createdFaculty;
+        List<Faculty> facultyList = facultyService.findByColorOrName(facultyName, facultyColor);
+        if(facultyList.isEmpty() || facultyList == null) {
+            createdFaculty = facultyService.createFaculty(faculty);
+        } else {
+            createdFaculty = facultyList.get(0);
+        }
+        student.setFaculty(createdFaculty);
+        return student;
+    }
+
+    private ResponseEntity<Student> saveStudentInDatabase(URI uri, Student student) {
+        return this.restTemplate.postForEntity(uri, student, Student.class);
+    }
+
+    private void studentsAreFoundByCriteria(MultiValueMap<String, String> queryParams, Student... students) {
+        URI uri = getURIBuilder().queryParams(queryParams).build().toUri();
+        ResponseEntity<Set<Student>> response = restTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Set<Student>>() {
+                });
+        Assertions.assertThat(response.getBody()).isNotNull();
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        Set<Student> actualResult = response.getBody();
+        resetIds(actualResult);
+        Assertions.assertThat(actualResult).containsExactlyInAnyOrder(students);
+
+    }
+
+    private void resetIds(Set<Student> students) {
+        students.forEach(it -> it.setId(null));
+    }
+
+    private UriComponentsBuilder getURIBuilder() {
+        return UriComponentsBuilder.newInstance()
+                .scheme("http")
+                .host("localhost")
+                .port(port)
+                .path("/student");
     }
 
 }

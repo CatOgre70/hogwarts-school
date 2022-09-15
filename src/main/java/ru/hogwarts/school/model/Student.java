@@ -63,7 +63,7 @@ public class Student {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Student student = (Student) o;
-        return id == student.id && age == student.age && name.equals(student.name);
+        return Objects.equals(id, student.id) && Objects.equals(age, student.age) && name.equals(student.name);
     }
 
     @Override

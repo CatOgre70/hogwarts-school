@@ -67,18 +67,7 @@ public class StudentService {
     }
 
     public List<Student> findLastFiveStudents() {
-        int total = studentRepository.getTotalNumberOfStudentsInTheSchool();
-        int count = 0;
-        if(total < 5) {
-            count = total;
-        } else {
-            count = 5;
-        }
-        List<Student> students = studentRepository.sortStudentsById();
-        List<Student> result = new ArrayList<>(count);
-        for(int i = 0; i < count; i++)
-            result.add(students.get(i));
-        return result;
+        return studentRepository.findLastFiveStudents();
     }
 
 

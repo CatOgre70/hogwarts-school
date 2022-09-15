@@ -11,7 +11,7 @@ import java.awt.print.Pageable;
 import java.util.List;
 
 @Repository
-public interface StudentRepository extends JpaRepository<Student, Long>, PagingAndSortingRepository<Student, Long> {
+public interface StudentRepository extends JpaRepository<Student, Long> {
 
     List<Student> findByAge(int age);
 
@@ -25,7 +25,7 @@ public interface StudentRepository extends JpaRepository<Student, Long>, PagingA
     @Query(value = "select avg(age) from student", nativeQuery = true)
     double getAverageAge();
 
-    @Query(value = "select * from student order by id desc", nativeQuery = true)
-    List<Student> sortStudentsById();
+    @Query(value = "select * from student order by id desc limit 5", nativeQuery = true)
+    List<Student> findLastFiveStudents();
 
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.annotation.Profile;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
@@ -14,6 +15,7 @@ import java.util.*;
 
 import static org.mockito.Mockito.when;
 
+@Profile("test")
 @ExtendWith(MockitoExtension.class)
 public class StudentServiceTest {
 

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
+@Profile("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class StudentControllerTest {
@@ -35,7 +37,7 @@ public class StudentControllerTest {
 
     @Test
     public void createStudentTest() {
-        Student student = givenStudentWith("Miles Bletchley", 11, "Slytherin", "Green");
+        Student student = givenStudentWith("Miles Bletchley", 16, "Slytherin", "Green");
         ResponseEntity<Student> response = saveStudentInDatabase(getURIBuilder().build().toUri(), student);
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody()).isNotNull();
@@ -44,7 +46,7 @@ public class StudentControllerTest {
 
     @Test
     public void getStudentTest() {
-        Student student = givenStudentWith("Miles Bletchley", 11, "Slytherin", "Green");
+        Student student = givenStudentWith("Miles Bletchley", 16, "Slytherin", "Green");
         ResponseEntity<Student> response = saveStudentInDatabase(getURIBuilder().build().toUri(), student);
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody()).isNotNull();
@@ -131,19 +133,19 @@ public class StudentControllerTest {
 
     @Test
     public void updateStudentTest() {
-        Student student = givenStudentWith("Miles Bletchley", 11, "Slytherin", "Green");
+        Student student = givenStudentWith("Miles Bletchley", 16, "Slytherin", "Green");
         ResponseEntity<Student> response = saveStudentInDatabase(getURIBuilder().build().toUri(), student);
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody()).isNotNull();
         Assertions.assertThat(response.getBody().getId()).isNotNull();
         student = response.getBody();
-        updatingStudent(student, "Miles Bletchley", 12);
-        studentHasBeenUpdated(student, "Miles Bletchley", 12);
+        updatingStudent(student, "Miles Bletchley", 17);
+        studentHasBeenUpdated(student, "Miles Bletchley", 17);
     }
 
     @Test
     public void deleteStudentTest() {
-        Student student = givenStudentWith("Miles Bletchley", 11, "Slytherin", "Green");
+        Student student = givenStudentWith("Miles Bletchley", 16, "Slytherin", "Green");
         ResponseEntity<Student> response = saveStudentInDatabase(getURIBuilder().build().toUri(), student);
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(response.getBody()).isNotNull();

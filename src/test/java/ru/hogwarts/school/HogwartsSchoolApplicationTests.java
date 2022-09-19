@@ -21,7 +21,7 @@ class HogwartsSchoolApplicationTests {
     private TestRestTemplate restTemplate;
 
     @Test
-    void contextLoads() throws Exception {
+    void contextLoads() {
 
         Assertions.assertThat(studentController).isNotNull();
 

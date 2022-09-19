@@ -1,5 +1,7 @@
 package ru.hogwarts.school.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -35,7 +37,10 @@ public class AvatarService {
         this.avatarRepository = avatarRepository;
     }
 
+    private final Logger logger = LoggerFactory.getLogger(AvatarService.class);
+
     public void uploadAvatar(Long studentId, MultipartFile avatarFile) throws IOException {
+        logger.info("Method \"AvatarService.uploadAvatar()\" was invoked");
         Student student = studentRepository.findStudentById(studentId);
         Path filePath = Path.of(avatarsDir, studentId + "." + getExtensions(avatarFile.getOriginalFilename()));
         Files.createDirectories(filePath.getParent());
@@ -58,6 +63,7 @@ public class AvatarService {
     }
 
     private byte[] generateImagePreview(Path filePath) throws IOException {
+        logger.debug("Method \"AvatarService.generateImagePreview()\" was invoked with Path parameter: " + filePath);
         try (InputStream is = Files.newInputStream(filePath);
             BufferedInputStream bis = new BufferedInputStream(is, 1024);
             ByteArrayOutputStream baos = new ByteArrayOutputStream()
@@ -76,14 +82,17 @@ public class AvatarService {
     }
 
     public Avatar findAvatar(Long studentId) {
+        logger.info("Method \"AvatarService.findAvatar()\" was invoked");
         return avatarRepository.findByStudentId(studentId).orElse(new Avatar());
     }
 
     private String getExtensions(String fileName) {
+        logger.debug("Method \"AvatarService.getExtensions()\" was invoked with String parameter: " + fileName);
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
     public List<Avatar> getAllAvatars(int offset, int pageSize) {
+        logger.info("Method \"AvatarService.getAllAvatars()\" was invoked");
         var pageRequest = PageRequest.of(offset, pageSize);
         return avatarRepository.findAll(pageRequest).getContent();
 

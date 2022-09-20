@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.repository.FacultyRepository;
 
@@ -17,7 +18,7 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.when;
 
-@Profile("test")
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class FacultyServiceTest {
 

@@ -66,4 +66,9 @@ public class FacultyController {
         facultyService.deleteFaculty(id);
     }
 
+    @GetMapping("/statistics/longestFacultyName")
+    public String longestFacultyName(){
+        return facultyService.longestFacultyName();
+    }
+
 }

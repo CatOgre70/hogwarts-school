@@ -8,8 +8,10 @@ import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
@@ -81,6 +83,30 @@ public class StudentService {
     public List<Student> findLastFiveStudents() {
         logger.info("Method \"StudentService.findLastFiveStudents()\" was invoked");
         return studentRepository.findLastFiveStudents();
+    }
+
+    public List<Student> getAllWithNameStartedWith(char ch) {
+        List<Student> sList = studentRepository.findAll();
+        Comparator<Student> compareByName = new Comparator<Student>() {
+            @Override
+            public int compare(Student o1, Student o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        };
+        sList.forEach(s -> s.setName(s.getName().toUpperCase()));
+        String str = (ch + "").toUpperCase();
+        return sList.stream()
+                .filter(s -> s.getName().startsWith(str))
+                .sorted(compareByName)
+                .collect(Collectors.toList());
+    }
+
+    public double getAverageAge1() {
+        List<Student> sList = studentRepository.findAll();
+        double a = (double) sList.stream()
+                .mapToDouble(s -> s.getAge())
+                .sum();
+        return a / sList.size();
     }
 
 }

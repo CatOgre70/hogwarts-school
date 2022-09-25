@@ -50,6 +50,11 @@ public class StudentController {
         }
     }
 
+    @GetMapping("/getAllWithNameStartedWith")
+    public List<Student> getAllWithNameStartedWith(@RequestParam(name = "firstchar") char ch){
+        return studentService.getAllWithNameStartedWith(ch);
+    }
+
     @GetMapping("/statistics/totalpopulation")
     public int getTotalNumberOfStudentsInTheSchool(){
         return studentService.getTotalNumberOfStudentsInTheSchool();
@@ -58,6 +63,11 @@ public class StudentController {
     @GetMapping("/statistics/averageage")
     public double getAverageAge(){
         return studentService.getAverageAge();
+    }
+
+    @GetMapping("/statistics/averageage1")
+    public double getAverageAge1(){
+        return studentService.getAverageAge1();
     }
 
     @GetMapping("/getlastfivestudents")

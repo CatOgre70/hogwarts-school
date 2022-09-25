@@ -1,6 +1,7 @@
 package ru.hogwarts.school.model;
 
 import javax.persistence.*;
+import java.util.Comparator;
 import java.util.Objects;
 
 @Entity(name="Student")

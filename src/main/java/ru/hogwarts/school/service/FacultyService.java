@@ -8,9 +8,11 @@ import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class FacultyService {
@@ -66,5 +68,21 @@ public class FacultyService {
         } else {
             throw new FacultyNotFoundException("Faculty with id = " + id + " is not found in the database");
         }
+    }
+
+    public String longestFacultyName() {
+        Comparator<Faculty> compareByNameLength = new Comparator<Faculty>() {
+            @Override
+            public int compare(Faculty o1, Faculty o2) {
+                return o1.getName().length() - o2.getName().length();
+            }
+        };
+
+        List<Faculty> fList =  facultyRepository.findAll();
+        return fList.stream()
+                .max(compareByNameLength)
+                .orElseThrow(() -> new FacultyNotFoundException("Что-то пошло не так"))
+                .getName();
+
     }
 }

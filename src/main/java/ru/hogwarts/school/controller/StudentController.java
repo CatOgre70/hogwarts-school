@@ -80,6 +80,16 @@ public class StudentController {
         return studentService.getFaculty(id);
     }
 
+    @GetMapping("/consoleout")
+    public String allStudentsToConsoleOutput(){
+        return studentService.allStudentsToConsoleOutput();
+    }
+
+    @GetMapping("/consoleoutsynchronized")
+    public String allStudentsToConsoleSyncOutput(){
+        return studentService.allStudentsToConsoleSyncOutput();
+    }
+
     @PutMapping
     public ResponseEntity<Student> updateStudent(@RequestBody Student student){
         Student student1 = studentService.updateStudent(student);

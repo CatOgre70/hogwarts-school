@@ -87,12 +87,7 @@ public class StudentService {
 
     public List<Student> getAllWithNameStartedWith(char ch) {
         List<Student> sList = studentRepository.findAll();
-        Comparator<Student> compareByName = new Comparator<Student>() {
-            @Override
-            public int compare(Student o1, Student o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        };
+        Comparator<Student> compareByName = Comparator.comparing(Student::getName);
         sList.forEach(s -> s.setName(s.getName().toUpperCase()));
         String str = (ch + "").toUpperCase();
         return sList.stream()
@@ -103,10 +98,77 @@ public class StudentService {
 
     public double getAverageAge1() {
         List<Student> sList = studentRepository.findAll();
-        double a = (double) sList.stream()
-                .mapToDouble(s -> s.getAge())
-                .sum();
-        return a / sList.size();
+        return sList.stream()
+                .mapToDouble(Student::getAge)
+                .average().getAsDouble();
     }
+
+    public String allStudentsToConsoleOutput() {
+        List<Student> sList = studentRepository.findAllSortedById();
+
+        StudentService studentService1 = new StudentService(studentRepository);
+
+        studentService1.studentConsoleOut(sList.get(0));
+        studentService1.studentConsoleOut(sList.get(1));
+
+        new Thread(() -> {
+            studentService1.studentConsoleOut(sList.get(2));
+            studentService1.studentConsoleOut(sList.get(3));
+        }).start();
+        new Thread(() -> {
+            studentService1.studentConsoleOut(sList.get(4));
+            studentService1.studentConsoleOut(sList.get(5));
+        }).start();
+
+        studentService1.studentConsoleOut(sList.get(6));
+        studentService1.studentConsoleOut(sList.get(7));
+
+        return "Ok";
+    }
+
+    public String allStudentsToConsoleSyncOutput() {
+        List<Student> sList = studentRepository.findAllSortedById();
+
+        StudentService studentService1 = new StudentService(studentRepository);
+
+        Thread thread1 = new Thread(() -> {
+            studentService1.studentConsoleSyncOut(sList.get(2));
+            studentService1.studentConsoleSyncOut(sList.get(3));
+        });
+        Thread thread2 = new Thread(() -> {
+            studentService1.studentConsoleSyncOut(sList.get(4));
+            studentService1.studentConsoleSyncOut(sList.get(5));
+        });
+
+        studentConsoleSyncOut(sList.get(0));
+        studentConsoleSyncOut(sList.get(1));
+        thread1.start();
+        thread2.start();
+        studentService1.studentConsoleSyncOut(sList.get(6));
+        studentService1.studentConsoleSyncOut(sList.get(7));
+
+        return "Ok";
+    }
+
+    private void studentConsoleOut(Student student) {
+        try {
+            System.out.println(student);
+            Thread.sleep(1000);
+        } catch(InterruptedException e) {
+            System.out.println("Thread was interrupted");
+        }
+    }
+
+    private void studentConsoleSyncOut(Student student) {
+        try {
+            synchronized (StudentService.class) {
+                System.out.println(student);
+                Thread.sleep(1000);
+            }
+        } catch(InterruptedException e) {
+            System.out.println("Thread was interrupted");
+        }
+    }
+
 
 }

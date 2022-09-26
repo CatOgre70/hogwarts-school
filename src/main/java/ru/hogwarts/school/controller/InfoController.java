@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 @RequestMapping("/getport")
 public class InfoController {
 
+    Logger logger = LoggerFactory.getLogger(InfoController.class);
     @Value("${server.port}")
     private Integer serverPort;
 
@@ -24,7 +25,6 @@ public class InfoController {
 
     @GetMapping("/calculation")
     public Integer calculation(){
-        Logger logger = LoggerFactory.getLogger(InfoController.class);
         logger.info("Calculation procedure started");
         int result = Stream.iterate(1, a -> a + 1)
                 .limit(1_000_000)

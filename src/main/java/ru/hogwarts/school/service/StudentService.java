@@ -100,7 +100,8 @@ public class StudentService {
         List<Student> sList = studentRepository.findAll();
         return sList.stream()
                 .mapToDouble(Student::getAge)
-                .average().getAsDouble();
+                .average()
+                .orElseThrow();
     }
 
     public String allStudentsToConsoleOutput() {

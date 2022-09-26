@@ -7,8 +7,6 @@ import ru.hogwarts.school.exceptions.StudentNotFoundException;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
-
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -85,14 +83,14 @@ public class StudentService {
         return studentRepository.findLastFiveStudents();
     }
 
-    public List<Student> getAllWithNameStartedWith(char ch) {
+    public List<String> getAllWithNameStartedWith(char ch) {
         List<Student> sList = studentRepository.findAll();
-        Comparator<Student> compareByName = Comparator.comparing(Student::getName);
-        sList.forEach(s -> s.setName(s.getName().toUpperCase()));
         String str = (ch + "").toUpperCase();
         return sList.stream()
-                .filter(s -> s.getName().startsWith(str))
-                .sorted(compareByName)
+                .map(Student::getName)
+                .map(String::toUpperCase)
+                .filter(s -> s.startsWith(str))
+                .sorted()
                 .collect(Collectors.toList());
     }
 

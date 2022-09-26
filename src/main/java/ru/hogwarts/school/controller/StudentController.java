@@ -51,7 +51,7 @@ public class StudentController {
     }
 
     @GetMapping("/getAllWithNameStartedWith")
-    public List<Student> getAllWithNameStartedWith(@RequestParam(name = "firstchar") char ch){
+    public List<String> getAllWithNameStartedWith(@RequestParam(name = "firstchar") char ch){
         return studentService.getAllWithNameStartedWith(ch);
     }
 
